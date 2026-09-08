@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Generador de votaciones · La Nación</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
   html,body{margin:0;background:#eef2f7;color:#0f172a;font-family:Arial,Helvetica,sans-serif}
   .lnv-app{width:100%;min-width:1180px;padding:20px 24px 36px}
@@ -38,69 +37,32 @@
     letter-spacing:.02em;
     box-shadow:0 1px 0 rgba(255,255,255,.12) inset,0 1px 2px rgba(0,0,0,.18);
   }
-  .lnv-horizontal-layout{
-    display:grid;
-    grid-template-rows:auto auto 1fr auto auto;
-    gap:8px;
-    height:100%;
+  /* Horizontal: composición inspirada en la lógica espacial de Delfino */
+  .lnv-h-layout{height:100%;display:grid;grid-template-rows:88px 1fr 1fr;gap:4px}
+  .lnv-h-top{display:flex;justify-content:center;align-items:start;gap:16px}
+  .lnv-h-half{display:grid;grid-template-columns:1fr 320px 1fr;gap:10px;align-items:center;min-height:0}
+  .lnv-h-left,.lnv-h-right{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px 2px;align-content:center}
+  .lnv-h-left{padding-right:3px}.lnv-h-right{padding-left:3px}
+  .lnv-h-bottom{display:grid;grid-template-columns:repeat(15,minmax(0,1fr));gap:4px 2px;align-items:start}
+  .lnv-h-layout .lnv-seat-card{min-width:0}
+  .lnv-h-layout .lnv-seat-name{max-width:76px;margin-left:auto;margin-right:auto}
+
+  /* Vertical: composición tipo Canva de La Nación */
+  .lnv-v-layout{height:100%;display:grid;grid-template-rows:100px 360px 1fr;gap:12px}
+  .lnv-v-top{display:flex;justify-content:center;gap:22px;align-items:start}
+  .lnv-v-upper{display:grid;grid-template-columns:1fr 330px 1fr;gap:12px;align-items:center}
+  .lnv-v-side{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 4px;align-content:center}
+  .lnv-v-bottom{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:12px 4px;align-content:start}
+  .lnv-v-layout .lnv-seat-name{max-width:96px;margin-left:auto;margin-right:auto}
+
+  @media print {
+    html,body{margin:0!important;padding:0!important;background:white!important}
+    .lnv-toolbar,.lnv-preview-shell>div:not(.lnv-preview-viewport){display:none!important}
+    .lnv-app,.lnv-preview-shell,.lnv-preview-viewport{margin:0!important;padding:0!important;width:auto!important;min-width:0!important;border:0!important;background:white!important}
+    .lnv-preview-viewport{overflow:visible!important;height:auto!important}
+    .lnv-stage{position:static!important;transform:none!important;box-shadow:none!important;border-radius:0!important}
   }
-  .lnv-horizontal-top-special{
-    display:flex;
-    justify-content:center;
-    gap:18px;
-  }
-  .lnv-horizontal-band{
-    display:grid;
-    grid-template-columns:repeat(13,minmax(0,1fr));
-    gap:5px;
-    align-items:start;
-  }
-  .lnv-horizontal-middle{
-    display:grid;
-    grid-template-columns:1fr 350px 1fr;
-    gap:16px;
-    align-items:center;
-    min-height:0;
-  }
-  .lnv-horizontal-side{
-    display:grid;
-    grid-template-columns:repeat(4,minmax(0,1fr));
-    gap:7px 5px;
-    align-content:center;
-  }
-  .lnv-horizontal-center{align-self:center}
-  .lnv-vertical-layout{
-    display:grid;
-    grid-template-rows:auto auto 1fr auto auto;
-    gap:14px;
-    height:100%;
-  }
-  .lnv-vertical-top-special{
-    display:flex;
-    justify-content:center;
-    gap:22px;
-  }
-  .lnv-vertical-band{
-    display:grid;
-    grid-template-columns:repeat(6,minmax(0,1fr));
-    gap:10px 8px;
-    align-items:start;
-  }
-  .lnv-vertical-middle{
-    display:grid;
-    grid-template-columns:1fr 340px 1fr;
-    gap:14px;
-    align-items:center;
-    min-height:0;
-  }
-  .lnv-vertical-side{
-    display:grid;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:12px 8px;
-    align-content:center;
-  }
-  .lnv-vertical-center{align-self:center}
-  .lnv-summary{background:rgba(4,34,58,.68);color:white;border-radius:24px;padding:22px;border:1px solid rgba(255,255,255,.14);box-shadow:0 12px 34px rgba(0,0,0,.16);backdrop-filter:blur(3px)}
+  .lnv-summary{background:rgba(3,29,51,.34);color:white;border-radius:18px;padding:18px;border:1px solid rgba(255,255,255,.10);box-shadow:none;backdrop-filter:blur(1.5px)}
   .lnv-summary-title{font-weight:900;line-height:1.02;color:white}
   .lnv-summary-desc{color:rgba(255,255,255,.84);line-height:1.28}
   .lnv-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -120,11 +82,8 @@
       </div>
       <div class="flex items-center gap-2">
         <button id="lnv-refresh" type="button" class="lnv-focus rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700">Actualizar datos</button>
-        <select id="lnv-export-format" class="lnv-focus rounded-full border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-700" aria-label="Formato de descarga">
-          <option value="png">PNG</option>
-          <option value="jpg">JPG</option>
-        </select>
-        <button id="lnv-download" type="button" class="lnv-focus rounded-full border border-[#11497d] bg-[#11497d] px-4 py-2 text-sm font-bold text-white">Descargar imagen</button>
+        <button id="lnv-print" type="button" class="lnv-focus rounded-full border border-[#11497d] bg-[#11497d] px-4 py-2 text-sm font-bold text-white">Guardar PDF</button>
+        <button id="lnv-download" type="button" class="lnv-focus rounded-full border border-slate-300 bg-slate-100 px-4 py-2 text-sm font-bold text-slate-400" title="Para exportar PNG con fotos necesitamos alojar las imágenes en el mismo dominio" disabled>PNG (próximamente)</button>
       </div>
     </div>
     <div class="mt-4 flex flex-wrap gap-2" aria-label="Tamaño de salida">
@@ -253,18 +212,19 @@ function lnvSummary(ficha,rows,mode){
   const resultado=(ficha.Resultado||"").trim();
   const resultColor=/aprob/i.test(resultado)?"#15803d":/rechaz|reprob/i.test(resultado)?"#be123c":"#0f172a";
   const vertical=mode==="vertical";
+  const facebook=lnvPreset==="facebook";
   return `<div class="lnv-summary">
-    <div style="font-size:${vertical?18:15}px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.7)">${lnvEsc(ficha.Debate||"")}${ficha.Expediente?` · Exp. ${lnvEsc(ficha.Expediente)}`:""}</div>
-    <h1 class="lnv-summary-title" style="font-size:${vertical?40:31}px;margin-top:10px">${lnvEsc(ficha.Proyecto||"Votación legislativa")}</h1>
-    ${ficha.Descripción?`<p class="lnv-summary-desc" style="font-size:${vertical?23:18}px;margin-top:12px">${lnvEsc(ficha.Descripción)}</p>`:""}
-    <div class="lnv-stat-grid" style="margin-top:${vertical?22:16}px">
-      <div class="lnv-stat" style="background:rgba(22,163,74,.15);border:1px solid rgba(34,197,94,.22)"><div style="font-size:${vertical?40:31}px;font-weight:900;color:#15803d">${c.favor}</div><div style="font-size:${vertical?15:12}px;font-weight:900;text-transform:uppercase;color:#166534">A favor</div></div>
-      <div class="lnv-stat" style="background:rgba(220,38,38,.14);border:1px solid rgba(244,63,94,.22)"><div style="font-size:${vertical?40:31}px;font-weight:900;color:#be123c">${c.contra}</div><div style="font-size:${vertical?15:12}px;font-weight:900;text-transform:uppercase;color:#9f1239">En contra</div></div>
-      <div class="lnv-stat" style="background:rgba(148,163,184,.14);border:1px solid rgba(203,213,225,.18)"><div style="font-size:${vertical?40:31}px;font-weight:900;color:#475569">${c.no}</div><div style="font-size:${vertical?15:12}px;font-weight:900;text-transform:uppercase;color:#475569">Presente, no votó</div></div>
-      <div class="lnv-stat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)"><div style="font-size:${vertical?40:31}px;font-weight:900;color:#64748b">${c.ausente}</div><div style="font-size:${vertical?15:12}px;font-weight:900;text-transform:uppercase;color:#64748b">Ausentes</div></div>
+    <div style="font-size:${vertical?18:(facebook?10:13)}px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.7)">${lnvEsc(ficha.Debate||"")}${ficha.Expediente?` · Exp. ${lnvEsc(ficha.Expediente)}`:""}</div>
+    <h1 class="lnv-summary-title" style="font-size:${vertical?36:(facebook?22:28)}px;margin-top:8px">${lnvEsc(ficha.Proyecto||"Votación legislativa")}</h1>
+    ${ficha.Descripción?`<p class="lnv-summary-desc" style="font-size:${vertical?20:(facebook?12:16)}px;margin-top:8px">${lnvEsc(ficha.Descripción)}</p>`:""}
+    <div class="lnv-stat-grid" style="margin-top:${vertical?18:(facebook?10:14)}px">
+      <div class="lnv-stat" style="background:rgba(22,163,74,.15);border:1px solid rgba(34,197,94,.22)"><div style="font-size:${vertical?34:(facebook?22:28)}px;font-weight:900;color:#15803d">${c.favor}</div><div style="font-size:${vertical?13:(facebook?9:11)}px;font-weight:900;text-transform:uppercase;color:#166534">A favor</div></div>
+      <div class="lnv-stat" style="background:rgba(220,38,38,.14);border:1px solid rgba(244,63,94,.22)"><div style="font-size:${vertical?34:(facebook?22:28)}px;font-weight:900;color:#be123c">${c.contra}</div><div style="font-size:${vertical?13:(facebook?9:11)}px;font-weight:900;text-transform:uppercase;color:#9f1239">En contra</div></div>
+      <div class="lnv-stat" style="background:rgba(148,163,184,.14);border:1px solid rgba(203,213,225,.18)"><div style="font-size:${vertical?34:(facebook?22:28)}px;font-weight:900;color:#475569">${c.no}</div><div style="font-size:${vertical?13:(facebook?9:11)}px;font-weight:900;text-transform:uppercase;color:#475569">Presente, no votó</div></div>
+      <div class="lnv-stat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)"><div style="font-size:${vertical?34:(facebook?22:28)}px;font-weight:900;color:#64748b">${c.ausente}</div><div style="font-size:${vertical?13:(facebook?9:11)}px;font-weight:900;text-transform:uppercase;color:#64748b">Ausentes</div></div>
     </div>
-    <div style="margin-top:${vertical?18:13}px;font-size:${vertical?18:13}px;font-weight:800;color:rgba(255,255,255,.72)">${presentes} presentes</div>
-    ${resultado?`<div style="margin-top:4px;font-size:${vertical?42:30}px;font-weight:900;color:${resultColor}">${lnvEsc(resultado).toUpperCase()}</div>`:""}
+    <div style="margin-top:${vertical?18:13}px;font-size:${vertical?15:(facebook?10:12)}px;font-weight:800;color:rgba(255,255,255,.72)">${presentes} presentes</div>
+    ${resultado?`<div style="margin-top:4px;font-size:${vertical?34:(facebook?23:28)}px;font-weight:900;color:${resultColor}">${lnvEsc(resultado).toUpperCase()}</div>`:""}
   </div>`;
 }
 function lnvRenderGraphic(){
@@ -272,59 +232,56 @@ function lnvRenderGraphic(){
   const preset=LNV_PRESETS[lnvPreset],ficha=lnvData.ficha[0]||{};
   const rows=[...lnvData.votacion].sort((a,b)=>(Number(a.Orden)||999)-(Number(b.Orden)||999));
   const byOrder=new Map(rows.map(r=>[Number(r.Orden),r]));
-  const vertical=preset.orientation==="vertical";
+  const card=(n,size)=>lnvSeatCard(byOrder.get(n),size);
 
-  // Tamaños se ajustan al formato para que ninguna curul se corte.
-  const size=vertical
-    ? {photo:preset.height>=1800?58:52,ring:5,name:preset.height>=1800?14:12,party:11,gap:4}
-    : {photo:preset.width>=1500?48:40,ring:4,name:preset.width>=1500?11:9,party:preset.width>=1500?9:8,gap:3};
+  if(preset.orientation==="horizontal"){
+    const size=lnvPreset==="facebook"
+      ? {photo:34,ring:3,name:8,party:7,gap:2}
+      : {photo:42,ring:4,name:10,party:8,gap:2};
 
-  const card=n=>lnvSeatCard(byOrder.get(n),size);
-
-  if(!vertical){
-    // 3 arriba + 13 + (8 izquierda / centro / 7 derecha) + 13 + 13 = 57
-    const topSpecial=[1,2,3].map(card).join("");
-    const topBand=Array.from({length:13},(_,i)=>card(i+4)).join("");           // 4–16
-    const sideLeft=Array.from({length:8},(_,i)=>card(i+17)).join("");         // 17–24
-    const sideRight=Array.from({length:7},(_,i)=>card(i+25)).join("");        // 25–31
-    const bottomBand1=Array.from({length:13},(_,i)=>card(i+32)).join("");     // 32–44
-    const bottomBand2=Array.from({length:13},(_,i)=>card(i+45)).join("");     // 45–57
+    // Lógica Delfino: 3 arriba, dos bloques laterales alrededor del centro,
+    // y el resto en dos franjas inferiores compactas.
+    const top=[1,2,3].map(n=>card(n,size)).join("");
+    const left=Array.from({length:14},(_,i)=>card(i+4,size)).join("");
+    const right=Array.from({length:14},(_,i)=>card(i+18,size)).join("");
+    const bottom1=Array.from({length:13},(_,i)=>card(i+32,size)).join("");
+    const bottom2=Array.from({length:13},(_,i)=>card(i+45,size)).join("");
 
     document.getElementById("lnv-graphic").innerHTML=`
-      <div class="lnv-horizontal-layout">
-        <div class="lnv-horizontal-top-special">${topSpecial}</div>
-        <div class="lnv-horizontal-band">${topBand}</div>
-        <div class="lnv-horizontal-middle">
-          <div class="lnv-horizontal-side">${sideLeft}</div>
-          <div class="lnv-horizontal-center">${lnvSummary(ficha,rows,preset.orientation)}</div>
-          <div class="lnv-horizontal-side">${sideRight}</div>
+      <div class="lnv-h-layout">
+        <div class="lnv-h-top">${top}</div>
+        <div class="lnv-h-half">
+          <div class="lnv-h-left">${left}</div>
+          <div>${lnvSummary(ficha,rows,preset.orientation)}</div>
+          <div class="lnv-h-right">${right}</div>
         </div>
-        <div class="lnv-horizontal-band">${bottomBand1}</div>
-        <div class="lnv-horizontal-band">${bottomBand2}</div>
+        <div>
+          <div class="lnv-h-bottom" style="grid-template-columns:repeat(13,minmax(0,1fr));margin-bottom:4px">${bottom1}</div>
+          <div class="lnv-h-bottom" style="grid-template-columns:repeat(13,minmax(0,1fr))">${bottom2}</div>
+        </div>
       </div>`;
   }else{
-    // Vertical: mismas 57 curules, compactadas en bandas de 6.
-    const topSpecial=[1,2,3].map(card).join("");
-    const topBand=Array.from({length:12},(_,i)=>card(i+4)).join("");           // 4–15
-    const sideLeft=Array.from({length:8},(_,i)=>card(i+16)).join("");         // 16–23
-    const sideRight=Array.from({length:8},(_,i)=>card(i+24)).join("");        // 24–31
-    const bottomBand1=Array.from({length:12},(_,i)=>card(i+32)).join("");     // 32–43
-    const bottomBand2=Array.from({length:14},(_,i)=>card(i+44)).join("");     // 44–57
+    const size=lnvPreset==="stories"
+      ? {photo:50,ring:4,name:11,party:9,gap:3}
+      : {photo:46,ring:4,name:10,party:8,gap:3};
+
+    // Vertical: orden compacto tipo Canva de La Nación.
+    const top=[1,2,3].map(n=>card(n,size)).join("");
+    const left=Array.from({length:14},(_,i)=>card(i+4,size)).join("");
+    const right=Array.from({length:14},(_,i)=>card(i+18,size)).join("");
+    const bottom=Array.from({length:26},(_,i)=>card(i+32,size)).join("");
 
     document.getElementById("lnv-graphic").innerHTML=`
-      <div class="lnv-vertical-layout">
-        <div class="lnv-vertical-top-special">${topSpecial}</div>
-        <div class="lnv-vertical-band">${topBand}</div>
-        <div class="lnv-vertical-middle">
-          <div class="lnv-vertical-side">${sideLeft}</div>
-          <div class="lnv-vertical-center">${lnvSummary(ficha,rows,preset.orientation)}</div>
-          <div class="lnv-vertical-side">${sideRight}</div>
+      <div class="lnv-v-layout">
+        <div class="lnv-v-top">${top}</div>
+        <div class="lnv-v-upper">
+          <div class="lnv-v-side">${left}</div>
+          <div>${lnvSummary(ficha,rows,preset.orientation)}</div>
+          <div class="lnv-v-side">${right}</div>
         </div>
-        <div class="lnv-vertical-band">${bottomBand1}</div>
-        <div class="lnv-vertical-band" style="grid-template-columns:repeat(7,minmax(0,1fr))">${bottomBand2}</div>
+        <div class="lnv-v-bottom">${bottom}</div>
       </div>`;
   }
-
   document.getElementById("lnv-kicker").textContent=[ficha.Debate,ficha.Expediente?`Exp. ${ficha.Expediente}`:""].filter(Boolean).join(" · ");
 }
 function lnvBuildWatermark(width,height){
@@ -358,10 +315,13 @@ function lnvApplyPreset(name){
   header.querySelector("img").style.width=p.orientation==="horizontal"?"190px":"230px";
   document.getElementById("lnv-kicker").style.fontSize=p.orientation==="horizontal"?"13px":"17px";
   const graphic=document.getElementById("lnv-graphic");
-  graphic.style.marginTop=p.orientation==="horizontal"?"10px":"16px";
+  graphic.style.marginTop=p.orientation==="horizontal"?"6px":"12px";
   graphic.style.height=p.orientation==="horizontal"
-    ? (p.height-118)+"px"
-    : (p.height-155)+"px";
+    ? (p.height-92)+"px"
+    : (p.height-130)+"px";
+  let pageStyle=document.getElementById("lnv-page-style");
+  if(!pageStyle){pageStyle=document.createElement("style");pageStyle.id="lnv-page-style";document.head.appendChild(pageStyle);}
+  pageStyle.textContent=`@page { size: ${p.width/96}in ${p.height/96}in; margin:0; }`;
   const footer=document.getElementById("lnv-stage-footer");
   footer.style.left=content.style.paddingLeft||"34px";
   footer.style.right=content.style.paddingRight||"34px";
@@ -397,40 +357,16 @@ async function lnvRefresh(){
   try{await lnvLoad();}
   catch(e){console.error(e);err.textContent="No fue posible cargar Ficha o Votacion desde Google Sheets.";err.classList.add("lnv-show");document.getElementById("lnv-status").textContent="Error al actualizar";}
 }
-async function lnvWaitImages(root){
-  const imgs=[...root.querySelectorAll("img")];
-  await Promise.all(imgs.map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.onload=resolve;img.onerror=resolve;})));
-}
-async function lnvDownload(){
-  const stage=document.getElementById("lnv-stage"),format=document.getElementById("lnv-export-format").value;
-  const btn=document.getElementById("lnv-download");
-  const old=btn.textContent;btn.textContent="Generando…";btn.disabled=true;
-  const oldTransform=stage.style.transform;
-  try{
-    await lnvWaitImages(stage);
-    stage.style.transform="none";
-    const canvas=await html2canvas(stage,{backgroundColor:null,scale:1,useCORS:true,allowTaint:false,logging:false,imageTimeout:15000});
-    const mime=format==="jpg"?"image/jpeg":"image/png";
-    const ext=format==="jpg"?"jpg":"png";
-    const data=canvas.toDataURL(mime,0.95);
-    const a=document.createElement("a");
-    a.href=data;
-    a.download=`votacion-la-nacion-${lnvPreset}.${ext}`;
-    document.body.appendChild(a);a.click();a.remove();
-    document.getElementById("lnv-status").textContent=`Imagen generada · ${LNV_PRESETS[lnvPreset].width}×${LNV_PRESETS[lnvPreset].height} px`;
-  }catch(e){
-    console.error(e);
-    const err=document.getElementById("lnv-error");
-    err.textContent="No se pudo exportar la imagen. Si alguna fotografía externa bloquea la descarga, pruebe nuevamente después de recargar.";
-    err.classList.add("lnv-show");
-  }finally{
-    stage.style.transform=oldTransform;
-    btn.textContent=old;btn.disabled=false;
-  }
+function lnvPrint(){
+  const stage=document.getElementById("lnv-stage");
+  const old=stage.style.transform;
+  stage.style.transform="none";
+  window.print();
+  setTimeout(()=>{stage.style.transform=old;},300);
 }
 document.querySelectorAll(".lnv-preset").forEach(b=>b.addEventListener("click",()=>lnvApplyPreset(b.dataset.preset)));
 document.getElementById("lnv-refresh").addEventListener("click",lnvRefresh);
-document.getElementById("lnv-download").addEventListener("click",lnvDownload);
+document.getElementById("lnv-print").addEventListener("click",lnvPrint);
 lnvApplyPreset("facebook");
 lnvRefresh();
 </script>
