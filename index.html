@@ -99,10 +99,10 @@ function personSvg(r){
   const clipId="clip-"+Math.random().toString(36).slice(2);
   return `
     <g transform="translate(${x} ${y})">
-      <defs><clipPath id="${clipId}"><circle cx="0" cy="-10" r="21.5"/></clipPath></defs>
+      <defs><clipPath id="${clipId}"><circle cx="0" cy="-10" r="22"/></clipPath></defs>
       <circle cx="0" cy="-10" r="26" fill="${vm.color}"/>
-      <circle cx="0" cy="-10" r="22" fill="#fff"/>
-      ${r.Foto?`<image href="${esc(r.Foto)}" x="-21.5" y="-31.5" width="43" height="43" preserveAspectRatio="xMidYMid slice" clip-path="url(#${clipId})"/>`:
+      
+      ${r.Foto?`<image href="${esc(r.Foto)}" x="-22" y="-32" width="44" height="44" preserveAspectRatio="xMidYMid slice" clip-path="url(#${clipId})"/>`:
       `<text x="0" y="-6" text-anchor="middle" font-size="10" font-weight="700" fill="#334155">${initials(r.Nombre)}</text>`}
       <text x="0" y="25" text-anchor="middle" font-size="7.2" font-weight="700" fill="#fff">
         <tspan x="0" dy="0">${esc(lines[0])}</tspan>
