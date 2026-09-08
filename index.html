@@ -52,7 +52,7 @@
     position:absolute;
     z-index:2;
     color:white;
-    text-align:center;
+    text-align:left;
   }
   .lnv-copy-kicker{
     font-weight:800;
@@ -75,7 +75,7 @@
   }
   .lnv-copy-counts{
     display:flex;
-    justify-content:center;
+    justify-content:flex-start;
     flex-wrap:wrap;
     gap:8px 14px;
     font-weight:800;
@@ -131,7 +131,7 @@
             <div id="lnv-kicker" class="text-right font-bold uppercase tracking-[.16em] text-white/70"></div>
           </header>
           <div id="lnv-graphic"></div>
-          <footer id="lnv-stage-footer" class="absolute z-[4] border-t border-white/20 text-white/65">Fuente: Asamblea Legislativa · Visualización: La Nación</footer>
+          <footer id="lnv-stage-footer" class="absolute z-[4] text-white/65">Fuente: Asamblea Legislativa</footer>
         </div>
       </section>
     </div>
@@ -239,24 +239,24 @@ function lnvCopyBlock(ficha,rows,preset){
   const resultColor=/aprob/i.test(resultado)?"#22c55e":/rechaz|reprob/i.test(resultado)?"#ef4444":"#ffffff";
 
   const dims={
-    facebook:{x:700,y:305,w:360,title:28,desc:15,kicker:11,result:26,counts:13},
-    twitter:{x:930,y:430,w:470,title:40,desc:20,kicker:14,result:34,counts:17},
-    instagram:{x:540,y:615,w:390,title:40,desc:22,kicker:14,result:34,counts:16},
-    stories:{x:540,y:800,w:440,title:46,desc:24,kicker:16,result:40,counts:18}
+    facebook:{x:285,y:315,w:650,title:24,desc:14,kicker:10,result:24,counts:12},
+    twitter:{x:360,y:430,w:900,title:34,desc:18,kicker:13,result:30,counts:15},
+    instagram:{x:315,y:560,w:450,title:36,desc:20,kicker:13,result:32,counts:15},
+    stories:{x:300,y:735,w:480,title:42,desc:22,kicker:15,result:36,counts:17}
   }[preset];
 
-  return `<div class="lnv-copy" style="left:${dims.x-dims.w/2}px;top:${dims.y-150}px;width:${dims.w}px">
+  return `<div class="lnv-copy" style="left:${dims.x}px;top:${dims.y}px;width:${dims.w}px">
     <div class="lnv-copy-kicker" style="font-size:${dims.kicker}px">${lnvEsc(ficha.Debate||"")}${ficha.Expediente?` · Exp. ${lnvEsc(ficha.Expediente)}`:""}</div>
-    <div class="lnv-copy-title" style="font-size:${dims.title}px;margin-top:8px">${lnvEsc(ficha.Proyecto||"Votación legislativa")}</div>
-    ${ficha.Descripción?`<div class="lnv-copy-desc" style="font-size:${dims.desc}px;margin-top:9px">${lnvEsc(ficha.Descripción)}</div>`:""}
-    <div class="lnv-copy-counts" style="font-size:${dims.counts}px;margin-top:14px">
+    <div class="lnv-copy-title" style="font-size:${dims.title}px;margin-top:7px">${lnvEsc(ficha.Proyecto||"Votación legislativa")}</div>
+    ${ficha.Descripción?`<div class="lnv-copy-desc" style="font-size:${dims.desc}px;margin-top:7px">${lnvEsc(ficha.Descripción)}</div>`:""}
+    <div class="lnv-copy-counts" style="font-size:${dims.counts}px;margin-top:11px">
       <span class="lnv-copy-favor">${c.favor} a favor</span>
       <span class="lnv-copy-contra">${c.contra} en contra</span>
       <span class="lnv-copy-neutral">${c.no} presente, no votó</span>
       <span class="lnv-copy-absent">${c.ausente} ausentes</span>
+      <span style="color:rgba(255,255,255,.65)">${presentes} presentes</span>
     </div>
-    <div style="margin-top:7px;font-size:${Math.max(10,dims.counts-1)}px;font-weight:700;color:rgba(255,255,255,.65)">${presentes} presentes</div>
-    ${resultado?`<div class="lnv-copy-result" style="font-size:${dims.result}px;margin-top:10px;color:${resultColor}">${lnvEsc(resultado).toUpperCase()}</div>`:""}
+    ${resultado?`<div class="lnv-copy-result" style="font-size:${dims.result}px;margin-top:8px;color:${resultColor}">${lnvEsc(resultado).toUpperCase()}</div>`:""}
   </div>`;
 }
 function lnvSeatAbs(r,x,y,size,width){
@@ -291,42 +291,68 @@ function lnvRenderGraphic(){
 
   let seats="";
   if(lnvPreset==="facebook"){
-    const size={photo:34,ring:3,name:8,party:7,gap:2},w=74;
-    // Delfino horizontal: Gerald, Yara y Reynaldo a la izquierda, en columna.
-    [{x:74,y:205},{x:74,y:315},{x:74,y:425}].forEach((p,i)=>seats+=seat(i+1,p,size,w));
-    // Oposición arriba: órdenes 32–57, dos filas compactas.
-    const top=lnvGridPositions(26,13,245,1140,112,68);
-    top.forEach((p,i)=>seats+=seat(i+32,p,size,w));
-    // PPSO restante abajo: órdenes 4–31, dos filas compactas.
-    const bottom=lnvGridPositions(28,14,215,1140,475,70);
-    bottom.forEach((p,i)=>seats+=seat(i+4,p,size,w));
+    const size={photo:34,ring:3,name:8,party:7,gap:2},w=66;
+
+    // Delfino horizontal: Gerald, Yara y Reynaldo a la izquierda.
+    [{x:72,y:230},{x:72,y:355},{x:72,y:480}].forEach((p,i)=>seats+=seat(i+1,p,size,w));
+
+    // Oposición arriba: más juntos en X, más separados en Y.
+    const top1=lnvLinearPositions(13,255,1110,120);
+    const top2=lnvLinearPositions(13,255,1110,215);
+    top1.forEach((p,i)=>seats+=seat(i+32,p,size,w));
+    top2.forEach((p,i)=>seats+=seat(i+45,p,size,w));
+
+    // PPSO abajo: dos filas compactas horizontalmente, con aire vertical.
+    const bot1=lnvLinearPositions(14,235,1120,470);
+    const bot2=lnvLinearPositions(14,235,1120,565);
+    bot1.forEach((p,i)=>seats+=seat(i+4,p,size,w));
+    bot2.forEach((p,i)=>seats+=seat(i+18,p,size,w));
+
   } else if(lnvPreset==="twitter"){
-    const size={photo:44,ring:4,name:10,party:8,gap:2},w=92;
-    [{x:95,y:270},{x:95,y:430},{x:95,y:590}].forEach((p,i)=>seats+=seat(i+1,p,size,w));
-    const top=lnvGridPositions(26,13,320,1510,150,92);
-    top.forEach((p,i)=>seats+=seat(i+32,p,size,w));
-    const bottom=lnvGridPositions(28,14,275,1510,675,95);
-    bottom.forEach((p,i)=>seats+=seat(i+4,p,size,w));
+    const size={photo:42,ring:4,name:10,party:8,gap:2},w=78;
+
+    [{x:100,y:300},{x:100,y:470},{x:100,y:640}].forEach((p,i)=>seats+=seat(i+1,p,size,w));
+
+    const top1=lnvLinearPositions(13,335,1490,145);
+    const top2=lnvLinearPositions(13,335,1490,260);
+    top1.forEach((p,i)=>seats+=seat(i+32,p,size,w));
+    top2.forEach((p,i)=>seats+=seat(i+45,p,size,w));
+
+    const bot1=lnvLinearPositions(14,300,1500,665);
+    const bot2=lnvLinearPositions(14,300,1500,790);
+    bot1.forEach((p,i)=>seats+=seat(i+4,p,size,w));
+    bot2.forEach((p,i)=>seats+=seat(i+18,p,size,w));
+
   } else if(lnvPreset==="instagram"){
-    const size={photo:48,ring:4,name:10,party:8,gap:2},w=90;
-    // Nación vertical: primeros tres arriba.
-    lnvLinearPositions(3,390,690,145).forEach((p,i)=>seats+=seat(i+1,p,size,w));
-    // PPSO 4–31: columnas laterales alrededor del texto.
-    const left=lnvGridPositions(14,2,115,245,300,105);
-    left.forEach((p,i)=>seats+=seat(i+4,p,size,w));
-    const right=lnvGridPositions(14,2,835,965,300,105);
-    right.forEach((p,i)=>seats+=seat(i+18,p,size,w));
-    // PLN y bancadas pequeñas abajo, compactadas.
-    const lower=lnvGridPositions(26,7,120,960,940,105);
+    const size={photo:46,ring:4,name:10,party:8,gap:2},w=82;
+
+    lnvLinearPositions(3,410,670,140).forEach((p,i)=>seats+=seat(i+1,p,size,w));
+
+    // Laterales más juntos horizontalmente, filas más separadas.
+    const leftX=[120,220], rightX=[860,960];
+    for(let i=0;i<14;i++){
+      const row=Math.floor(i/2), col=i%2;
+      seats+=seat(i+4,{x:leftX[col],y:300+row*112},size,w);
+      seats+=seat(i+18,{x:rightX[col],y:300+row*112},size,w);
+    }
+
+    // Bancadas pequeñas abajo, compactas.
+    const lower=lnvGridPositions(26,7,120,960,1030,115);
     lower.forEach((p,i)=>seats+=seat(i+32,p,size,w));
+
   } else {
-    const size={photo:54,ring:5,name:11,party:9,gap:3},w=96;
-    lnvLinearPositions(3,380,700,170).forEach((p,i)=>seats+=seat(i+1,p,size,w));
-    const left=lnvGridPositions(14,2,120,255,350,118);
-    left.forEach((p,i)=>seats+=seat(i+4,p,size,w));
-    const right=lnvGridPositions(14,2,825,960,350,118);
-    right.forEach((p,i)=>seats+=seat(i+18,p,size,w));
-    const lower=lnvGridPositions(26,6,120,960,1240,125);
+    const size={photo:52,ring:5,name:11,party:9,gap:3},w=88;
+
+    lnvLinearPositions(3,395,685,165).forEach((p,i)=>seats+=seat(i+1,p,size,w));
+
+    const leftX=[120,225], rightX=[855,960];
+    for(let i=0;i<14;i++){
+      const row=Math.floor(i/2), col=i%2;
+      seats+=seat(i+4,{x:leftX[col],y:360+row*132},size,w);
+      seats+=seat(i+18,{x:rightX[col],y:360+row*132},size,w);
+    }
+
+    const lower=lnvGridPositions(26,6,125,955,1280,132);
     lower.forEach((p,i)=>seats+=seat(i+32,p,size,w));
   }
 
@@ -375,7 +401,7 @@ function lnvApplyPreset(name){
   footer.style.left=content.style.paddingLeft||"34px";
   footer.style.right=content.style.paddingRight||"34px";
   footer.style.bottom=p.orientation==="horizontal"?"18px":"24px";
-  footer.style.paddingTop="8px";
+  footer.style.paddingTop="0";
   footer.style.fontSize=p.orientation==="horizontal"?"10px":"14px";
   lnvBuildWatermark(p.width,p.height);
   lnvRenderGraphic();
