@@ -38,19 +38,71 @@
     letter-spacing:.02em;
     box-shadow:0 1px 0 rgba(255,255,255,.12) inset,0 1px 2px rgba(0,0,0,.18);
   }
-  .lnv-horizontal-layout{display:grid;grid-template-columns:1fr 350px 1fr;grid-template-areas:"top top top" "left center right";gap:18px 22px;align-items:start}
-  .lnv-horizontal-top{grid-area:top;display:flex;justify-content:center;gap:34px}
-  .lnv-horizontal-left{grid-area:left;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 10px}
-  .lnv-horizontal-center{grid-area:center}
-  .lnv-horizontal-right{grid-area:right;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 10px}
-  .lnv-vertical-layout{display:grid;grid-template-columns:1fr 370px 1fr;grid-template-areas:"top top top" "left center right";gap:18px 18px;align-items:start}
-  .lnv-vertical-top{grid-area:top;display:flex;justify-content:center;gap:28px}
-  .lnv-vertical-left{grid-area:left;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 8px}
-  .lnv-vertical-center{grid-area:center}
-  .lnv-vertical-right{grid-area:right;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 8px}
-  .lnv-summary{background:rgba(255,255,255,.96);color:#0f172a;border-radius:28px;padding:24px;border:1px solid rgba(255,255,255,.4);box-shadow:0 10px 35px rgba(0,0,0,.12)}
-  .lnv-summary-title{font-weight:900;line-height:1.02;color:#0f172a}
-  .lnv-summary-desc{color:#475569;line-height:1.28}
+  .lnv-horizontal-layout{
+    display:grid;
+    grid-template-rows:auto auto 1fr auto auto;
+    gap:8px;
+    height:100%;
+  }
+  .lnv-horizontal-top-special{
+    display:flex;
+    justify-content:center;
+    gap:18px;
+  }
+  .lnv-horizontal-band{
+    display:grid;
+    grid-template-columns:repeat(13,minmax(0,1fr));
+    gap:5px;
+    align-items:start;
+  }
+  .lnv-horizontal-middle{
+    display:grid;
+    grid-template-columns:1fr 350px 1fr;
+    gap:16px;
+    align-items:center;
+    min-height:0;
+  }
+  .lnv-horizontal-side{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:7px 5px;
+    align-content:center;
+  }
+  .lnv-horizontal-center{align-self:center}
+  .lnv-vertical-layout{
+    display:grid;
+    grid-template-rows:auto auto 1fr auto auto;
+    gap:14px;
+    height:100%;
+  }
+  .lnv-vertical-top-special{
+    display:flex;
+    justify-content:center;
+    gap:22px;
+  }
+  .lnv-vertical-band{
+    display:grid;
+    grid-template-columns:repeat(6,minmax(0,1fr));
+    gap:10px 8px;
+    align-items:start;
+  }
+  .lnv-vertical-middle{
+    display:grid;
+    grid-template-columns:1fr 340px 1fr;
+    gap:14px;
+    align-items:center;
+    min-height:0;
+  }
+  .lnv-vertical-side{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px 8px;
+    align-content:center;
+  }
+  .lnv-vertical-center{align-self:center}
+  .lnv-summary{background:rgba(4,34,58,.68);color:white;border-radius:24px;padding:22px;border:1px solid rgba(255,255,255,.14);box-shadow:0 12px 34px rgba(0,0,0,.16);backdrop-filter:blur(3px)}
+  .lnv-summary-title{font-weight:900;line-height:1.02;color:white}
+  .lnv-summary-desc{color:rgba(255,255,255,.84);line-height:1.28}
   .lnv-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .lnv-stat{border-radius:16px;padding:12px}
   .lnv-error{display:none}
@@ -190,7 +242,7 @@ function lnvSeatCard(r,size){
   const meta=LNV_VOTE[vote]||LNV_VOTE["Ausente"];
   return `<div class="lnv-seat-card">
     <div class="lnv-seat-photo lnv-vote-ring ${meta.cls}" style="width:${size.photo}px;height:${size.photo}px;border-width:${size.ring}px">
-      ${r.Foto?`<img src="${lnvEsc(r.Foto)}" crossorigin="anonymous" alt="" onerror="this.style.display='none'">`:""}
+      ${r.Foto?`<img src="${lnvEsc(r.Foto)}" alt="" onerror="this.style.display='none'">`:""}
     </div>
     <div class="lnv-seat-name lnv-name" style="font-size:${size.name}px;margin-top:${size.gap}px">${lnvEsc(r.Nombre)}</div>
     <div class="lnv-seat-party" style="font-size:${size.party}px;${lnvPartyStyle(r.Partido)}">${lnvEsc(r.Partido)}</div>
@@ -202,16 +254,16 @@ function lnvSummary(ficha,rows,mode){
   const resultColor=/aprob/i.test(resultado)?"#15803d":/rechaz|reprob/i.test(resultado)?"#be123c":"#0f172a";
   const vertical=mode==="vertical";
   return `<div class="lnv-summary">
-    <div style="font-size:${vertical?18:15}px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#64748b">${lnvEsc(ficha.Debate||"")}${ficha.Expediente?` · Exp. ${lnvEsc(ficha.Expediente)}`:""}</div>
+    <div style="font-size:${vertical?18:15}px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.7)">${lnvEsc(ficha.Debate||"")}${ficha.Expediente?` · Exp. ${lnvEsc(ficha.Expediente)}`:""}</div>
     <h1 class="lnv-summary-title" style="font-size:${vertical?40:31}px;margin-top:10px">${lnvEsc(ficha.Proyecto||"Votación legislativa")}</h1>
     ${ficha.Descripción?`<p class="lnv-summary-desc" style="font-size:${vertical?23:18}px;margin-top:12px">${lnvEsc(ficha.Descripción)}</p>`:""}
     <div class="lnv-stat-grid" style="margin-top:${vertical?22:16}px">
-      <div class="lnv-stat" style="background:#ecfdf5"><div style="font-size:${vertical?40:31}px;font-weight:900;color:#15803d">${c.favor}</div><div style="font-size:${vertical?15:12}px;font-weight:900;text-transform:uppercase;color:#166534">A favor</div></div>
-      <div class="lnv-stat" style="background:#fff1f2"><div style="font-size:${vertical?40:31}px;font-weight:900;color:#be123c">${c.contra}</div><div style="font-size:${vertical?15:12}px;font-weight:900;text-transform:uppercase;color:#9f1239">En contra</div></div>
-      <div class="lnv-stat" style="background:#f1f5f9"><div style="font-size:${vertical?40:31}px;font-weight:900;color:#475569">${c.no}</div><div style="font-size:${vertical?15:12}px;font-weight:900;text-transform:uppercase;color:#475569">Presente, no votó</div></div>
-      <div class="lnv-stat" style="background:white;border:1px solid #e2e8f0"><div style="font-size:${vertical?40:31}px;font-weight:900;color:#64748b">${c.ausente}</div><div style="font-size:${vertical?15:12}px;font-weight:900;text-transform:uppercase;color:#64748b">Ausentes</div></div>
+      <div class="lnv-stat" style="background:rgba(22,163,74,.15);border:1px solid rgba(34,197,94,.22)"><div style="font-size:${vertical?40:31}px;font-weight:900;color:#15803d">${c.favor}</div><div style="font-size:${vertical?15:12}px;font-weight:900;text-transform:uppercase;color:#166534">A favor</div></div>
+      <div class="lnv-stat" style="background:rgba(220,38,38,.14);border:1px solid rgba(244,63,94,.22)"><div style="font-size:${vertical?40:31}px;font-weight:900;color:#be123c">${c.contra}</div><div style="font-size:${vertical?15:12}px;font-weight:900;text-transform:uppercase;color:#9f1239">En contra</div></div>
+      <div class="lnv-stat" style="background:rgba(148,163,184,.14);border:1px solid rgba(203,213,225,.18)"><div style="font-size:${vertical?40:31}px;font-weight:900;color:#475569">${c.no}</div><div style="font-size:${vertical?15:12}px;font-weight:900;text-transform:uppercase;color:#475569">Presente, no votó</div></div>
+      <div class="lnv-stat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)"><div style="font-size:${vertical?40:31}px;font-weight:900;color:#64748b">${c.ausente}</div><div style="font-size:${vertical?15:12}px;font-weight:900;text-transform:uppercase;color:#64748b">Ausentes</div></div>
     </div>
-    <div style="margin-top:${vertical?18:13}px;font-size:${vertical?18:13}px;font-weight:800;color:#64748b">${presentes} presentes</div>
+    <div style="margin-top:${vertical?18:13}px;font-size:${vertical?18:13}px;font-weight:800;color:rgba(255,255,255,.72)">${presentes} presentes</div>
     ${resultado?`<div style="margin-top:4px;font-size:${vertical?42:30}px;font-weight:900;color:${resultColor}">${lnvEsc(resultado).toUpperCase()}</div>`:""}
   </div>`;
 }
@@ -221,17 +273,58 @@ function lnvRenderGraphic(){
   const rows=[...lnvData.votacion].sort((a,b)=>(Number(a.Orden)||999)-(Number(b.Orden)||999));
   const byOrder=new Map(rows.map(r=>[Number(r.Orden),r]));
   const vertical=preset.orientation==="vertical";
-  const size=vertical?{photo:68,ring:6,name:16,party:13,gap:5}:{photo:54,ring:5,name:12,party:10,gap:4};
-  const top=[1,2,3].map(n=>lnvSeatCard(byOrder.get(n),size)).join("");
-  const left=Array.from({length:28},(_,i)=>lnvSeatCard(byOrder.get(i+4),size)).join("");
-  const right=Array.from({length:26},(_,i)=>lnvSeatCard(byOrder.get(i+32),size)).join("");
-  const cls=vertical?"lnv-vertical":"lnv-horizontal";
-  document.getElementById("lnv-graphic").innerHTML=`<div class="${cls}-layout">
-    <div class="${cls}-top">${top}</div>
-    <div class="${cls}-left">${left}</div>
-    <div class="${cls}-center">${lnvSummary(ficha,rows,preset.orientation)}</div>
-    <div class="${cls}-right">${right}</div>
-  </div>`;
+
+  // Tamaños se ajustan al formato para que ninguna curul se corte.
+  const size=vertical
+    ? {photo:preset.height>=1800?58:52,ring:5,name:preset.height>=1800?14:12,party:11,gap:4}
+    : {photo:preset.width>=1500?48:40,ring:4,name:preset.width>=1500?11:9,party:preset.width>=1500?9:8,gap:3};
+
+  const card=n=>lnvSeatCard(byOrder.get(n),size);
+
+  if(!vertical){
+    // 3 arriba + 13 + (8 izquierda / centro / 7 derecha) + 13 + 13 = 57
+    const topSpecial=[1,2,3].map(card).join("");
+    const topBand=Array.from({length:13},(_,i)=>card(i+4)).join("");           // 4–16
+    const sideLeft=Array.from({length:8},(_,i)=>card(i+17)).join("");         // 17–24
+    const sideRight=Array.from({length:7},(_,i)=>card(i+25)).join("");        // 25–31
+    const bottomBand1=Array.from({length:13},(_,i)=>card(i+32)).join("");     // 32–44
+    const bottomBand2=Array.from({length:13},(_,i)=>card(i+45)).join("");     // 45–57
+
+    document.getElementById("lnv-graphic").innerHTML=`
+      <div class="lnv-horizontal-layout">
+        <div class="lnv-horizontal-top-special">${topSpecial}</div>
+        <div class="lnv-horizontal-band">${topBand}</div>
+        <div class="lnv-horizontal-middle">
+          <div class="lnv-horizontal-side">${sideLeft}</div>
+          <div class="lnv-horizontal-center">${lnvSummary(ficha,rows,preset.orientation)}</div>
+          <div class="lnv-horizontal-side">${sideRight}</div>
+        </div>
+        <div class="lnv-horizontal-band">${bottomBand1}</div>
+        <div class="lnv-horizontal-band">${bottomBand2}</div>
+      </div>`;
+  }else{
+    // Vertical: mismas 57 curules, compactadas en bandas de 6.
+    const topSpecial=[1,2,3].map(card).join("");
+    const topBand=Array.from({length:12},(_,i)=>card(i+4)).join("");           // 4–15
+    const sideLeft=Array.from({length:8},(_,i)=>card(i+16)).join("");         // 16–23
+    const sideRight=Array.from({length:8},(_,i)=>card(i+24)).join("");        // 24–31
+    const bottomBand1=Array.from({length:12},(_,i)=>card(i+32)).join("");     // 32–43
+    const bottomBand2=Array.from({length:14},(_,i)=>card(i+44)).join("");     // 44–57
+
+    document.getElementById("lnv-graphic").innerHTML=`
+      <div class="lnv-vertical-layout">
+        <div class="lnv-vertical-top-special">${topSpecial}</div>
+        <div class="lnv-vertical-band">${topBand}</div>
+        <div class="lnv-vertical-middle">
+          <div class="lnv-vertical-side">${sideLeft}</div>
+          <div class="lnv-vertical-center">${lnvSummary(ficha,rows,preset.orientation)}</div>
+          <div class="lnv-vertical-side">${sideRight}</div>
+        </div>
+        <div class="lnv-vertical-band">${bottomBand1}</div>
+        <div class="lnv-vertical-band" style="grid-template-columns:repeat(7,minmax(0,1fr))">${bottomBand2}</div>
+      </div>`;
+  }
+
   document.getElementById("lnv-kicker").textContent=[ficha.Debate,ficha.Expediente?`Exp. ${ficha.Expediente}`:""].filter(Boolean).join(" · ");
 }
 function lnvBuildWatermark(width,height){
@@ -265,7 +358,10 @@ function lnvApplyPreset(name){
   header.querySelector("img").style.width=p.orientation==="horizontal"?"190px":"230px";
   document.getElementById("lnv-kicker").style.fontSize=p.orientation==="horizontal"?"13px":"17px";
   const graphic=document.getElementById("lnv-graphic");
-  graphic.style.marginTop=p.orientation==="horizontal"?"16px":"22px";
+  graphic.style.marginTop=p.orientation==="horizontal"?"10px":"16px";
+  graphic.style.height=p.orientation==="horizontal"
+    ? (p.height-118)+"px"
+    : (p.height-155)+"px";
   const footer=document.getElementById("lnv-stage-footer");
   footer.style.left=content.style.paddingLeft||"34px";
   footer.style.right=content.style.paddingRight||"34px";
